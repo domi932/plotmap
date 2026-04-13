@@ -10,4 +10,5 @@ plotmap/.env.local
 
 # OS files
 .DS_Store
-Thumbs.dbSupabase_Connection_credentials.txt 
+Thumbs.db
+Supabase_Connection_credentials.txt 
