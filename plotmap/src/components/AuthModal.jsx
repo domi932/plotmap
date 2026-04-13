@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../supabase.js'
 import './AuthModal.css'
 
-export default function AuthModal() {
+export default function AuthModal({ onClose }) {
   const [tab,      setTab]      = useState('signin')   // 'signin' | 'signup'
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
@@ -41,7 +41,7 @@ export default function AuthModal() {
   }
 
   return (
-    <div className="auth__backdrop">
+    <div className="auth__backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose?.() }}>
       <div className="auth__card">
         <div className="auth__brand">
           <h1 className="auth__logo">PlotMap</h1>

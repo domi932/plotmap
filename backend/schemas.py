@@ -54,4 +54,5 @@ class MapSummary(BaseModel):
 
 
 class MapDetail(MapSummary):
+    owner_id: str = ""
     graph_data: dict[str, Any]
