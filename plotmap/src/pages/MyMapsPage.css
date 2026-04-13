@@ -1,0 +1,159 @@
+.mymaps {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.mymaps__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 32px;
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.mymaps__logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.mymaps__logo:hover { opacity: 0.8; }
+
+.mymaps__heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  flex: 1;
+}
+
+.mymaps__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.mymaps__user-email {
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Main ────────────────────────────────────────────────────────────────── */
+.mymaps__main {
+  flex: 1;
+  padding: 32px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.mymaps__empty {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.mymaps__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* ── Grid ────────────────────────────────────────────────────────────────── */
+.mymaps__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.mymaps__card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mymaps__card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.mymaps__card-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.mymaps__card-published {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.mymaps__card-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.mymaps__btn {
+  padding: 5px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+.mymaps__btn:disabled { opacity: 0.5; cursor: default; }
+
+.mymaps__btn--accent {
+  background: var(--accent);
+  color: #fff;
+}
+.mymaps__btn--accent:not(:disabled):hover { opacity: 0.88; }
+
+.mymaps__btn--primary {
+  background: var(--accent);
+  color: #fff;
+}
+.mymaps__btn--primary:not(:disabled):hover { opacity: 0.88; }
+
+.mymaps__btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.mymaps__btn--ghost:not(:disabled):hover { color: var(--text); border-color: var(--text-muted); }
+
+.mymaps__btn--danger {
+  background: transparent;
+  color: #c0392b;
+  border: 1px solid #c0392b33;
+}
+.mymaps__btn--danger:not(:disabled):hover { background: #c0392b18; }

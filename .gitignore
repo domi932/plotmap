@@ -1,0 +1,13 @@
+# Backend
+backend/.env
+backend/__pycache__/
+backend/*.pyc
+
+# Frontend
+plotmap/node_modules/
+plotmap/dist/
+plotmap/.env.local
+
+# OS files
+.DS_Store
+Thumbs.dbSupabase_Connection_credentials.txt 

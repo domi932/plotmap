@@ -1,0 +1,100 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #0f0e11;
+  --surface:   #1a1820;
+  --border:    #2e2b38;
+  --accent:    #c8a96e;
+  --accent-dim:#7a6440;
+  --text:      #e8e4dc;
+  --text-muted:#7a7585;
+  --danger:    #c0524a;
+  --success:   #5a9e6f;
+
+  /* Node type background colours (border = darkened 30%) */
+  --node-event:            #3a5a8a;
+  --node-event-border:     #293f61;
+  --node-character:        #6a3a6a;
+  --node-character-border: #4a294a;
+  --node-note:             #8a6a3a;
+  --node-note-border:      #614a29;
+  --node-plothole:         #8a3a3a;
+
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* React Flow overrides */
+.react-flow__background {
+  /* --canvas-bg is set inline on .canvas-wrapper and falls back to --bg */
+  background-color: var(--canvas-bg, var(--bg)) !important;
+}
+
+.react-flow__edge-path {
+  stroke: var(--accent-dim);
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--accent);
+}
+
+.react-flow__handle {
+  background: var(--accent) !important;
+  border: 2px solid var(--bg) !important;
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.react-flow__controls {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  fill: var(--text) !important;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--border) !important;
+}
+
+.react-flow__minimap {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.react-flow__connection-path {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+/* Edge labels */
+.react-flow__edge-text {
+  fill: var(--text-muted) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 11px !important;
+}
+
+.react-flow__edge-textbg {
+  fill: var(--bg) !important;
+}

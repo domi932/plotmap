@@ -1,0 +1,224 @@
+.node {
+  min-width: 160px;
+  max-width: 240px;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  background: var(--surface);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transition: box-shadow 0.15s, border-color 0.15s;
+  cursor: default;
+}
+
+.node:hover {
+  box-shadow: 0 6px 28px rgba(0,0,0,0.55);
+}
+
+.node--selected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(200,169,110,0.25), 0 6px 28px rgba(0,0,0,0.55);
+}
+
+/* Type classes: background + matching border ─────────────────────────────── */
+.node--event     { background: var(--node-event);     border-color: var(--node-event-border); }
+.node--character { background: var(--node-character); border-color: var(--node-character-border); }
+.node--note      { background: var(--node-note);      border-color: var(--node-note-border); }
+
+.node__badge {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.node__title {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.node__desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.node__meta {
+  font-size: 11px;
+  color: var(--accent-dim);
+  margin-top: 8px;
+}
+
+/* ── Ghost mode (layer activeLayer-1): parent-context node ──────────────── */
+.node--ghost {
+  opacity: 0.38;
+  border-style: dashed;
+  pointer-events: auto;
+}
+
+.node--ghost:hover {
+  opacity: 0.65;
+}
+
+.node--ghost .node__badge {
+  color: var(--accent-dim);
+}
+
+/* ── Mini mode (layer activeLayer+1): compact pill, title only ───────────── */
+.node--mini {
+  min-width: 72px;
+  max-width: 150px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.node__mini-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  line-height: 1.2;
+}
+
+/* ── Micro mode (layer activeLayer+2): 16 px dot, no text ────────────────── */
+.node--micro {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  cursor: default;
+}
+
+.node--micro.node--event     { border-color: var(--node-event);     background: var(--node-event);     opacity: 0.75; }
+.node--micro.node--character { border-color: var(--node-character); background: var(--node-character); opacity: 0.75; }
+.node--micro.node--note      { border-color: var(--node-note);      background: var(--node-note);      opacity: 0.75; }
+
+/* Micro nodes with custom colour override */
+.node--micro[style*="background"] { opacity: 0.8; }
+
+/* ── Shared detail-hint ───────────────────────────────────────────────────── */
+.node__detail-hint {
+  font-size: 11px;
+  color: var(--accent-dim);
+  letter-spacing: 0.15em;
+  margin-top: 3px;
+  margin-bottom: 1px;
+  user-select: none;
+}
+
+/* ── Shape variants ───────────────────────────────────────────────────────── */
+
+/* rectangle: no extra styles (default) */
+
+.node--circle {
+  width: 120px;
+  height: 120px;
+  min-width: unset;
+  max-width: unset;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+}
+
+/* Diamond uses clip-path so handles land naturally at the four tips */
+.node--diamond {
+  width: 150px;
+  height: 150px;
+  min-width: unset;
+  max-width: unset;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  /* border is clipped — use drop-shadow for normal outline */
+  border-color: transparent;
+  filter: drop-shadow(0 0 1.5px var(--node-border-shadow, rgba(0,0,0,0.5)));
+}
+
+/* Hexagon clip-path — handles land at left/right tips; top/bottom are ~centred on the flat edges */
+.node--hexagon {
+  width: 180px;
+  height: 155px;
+  min-width: unset;
+  max-width: unset;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-color: transparent;
+  filter: drop-shadow(0 0 1.5px var(--node-border-shadow, rgba(0,0,0,0.5)));
+}
+
+.node--pill {
+  border-radius: 999px;
+  min-width: 120px;
+  padding: 16px 28px;
+}
+
+/* Selection overrides for clip-path shapes (border gets clipped; use glow instead) */
+.node--diamond.node--selected,
+.node--hexagon.node--selected {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 5px rgba(200, 169, 110, 0.85));
+}
+
+/* Mini shape variants */
+.node--mini.node--circle {
+  width: 60px;
+  height: 60px;
+  min-width: unset;
+  max-width: unset;
+  border-radius: 50%;
+  padding: 6px;
+}
+
+.node--mini.node--diamond {
+  width: 80px;
+  height: 80px;
+  min-width: unset;
+  max-width: unset;
+  border-radius: 0;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  padding: 14px;
+}
+
+.node--mini.node--hexagon {
+  width: 100px;
+  height: 84px;
+  min-width: unset;
+  max-width: unset;
+  border-radius: 0;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+.node--mini.node--pill {
+  border-radius: 999px;
+}

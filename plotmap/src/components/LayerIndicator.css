@@ -1,0 +1,57 @@
+.layer-ind {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 8px 5px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.layer-ind__icon {
+  font-size: 13px;
+  color: var(--accent-dim);
+  line-height: 1;
+}
+
+.layer-ind__select {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  appearance: auto;
+  /* Let the browser render the native dropdown arrow */
+  -webkit-appearance: auto;
+  padding-right: 2px;
+}
+
+/* Style the dropdown popup on supported browsers */
+.layer-ind__select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.layer-ind__back {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.layer-ind__back:hover {
+  background: var(--border);
+  color: var(--text);
+}

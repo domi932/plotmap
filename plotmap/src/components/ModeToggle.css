@@ -1,0 +1,59 @@
+.mode-toggle {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  gap: 2px;
+  background: rgba(26, 24, 32, 0.88);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+  backdrop-filter: blur(6px);
+}
+
+.mode-toggle__btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.mode-toggle__btn:hover:not(.mode-toggle__btn--disabled) {
+  background: var(--border);
+  color: var(--text);
+}
+
+.mode-toggle__btn--active {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
+.mode-toggle__btn--active:hover {
+  background: var(--accent-dim) !important;
+}
+
+/* Suggest is a placeholder — visually available but muted */
+.mode-toggle__btn--disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mode-toggle__icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.mode-toggle__label {
+  letter-spacing: 0.02em;
+}
