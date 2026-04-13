@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import './NodeBase.css'
 import { getNodeStyle } from './nodeUtils.js'
@@ -10,6 +11,7 @@ export default function PortalNode({ data, selected }) {
   const relLayer    = (data.layer ?? 0) - activeLayer
   const shape       = data.shape ?? DEFAULT_SHAPE
   const nodeStyle   = getNodeStyle(data.color)
+  const [imgError, setImgError] = useState(false)
 
   const isLinked    = !!data.targetMapId
   const hasLabel    = !!(data.label && data.label.trim())
@@ -34,6 +36,11 @@ export default function PortalNode({ data, selected }) {
         <Handle type="source" id="top-source"    position={Position.Top} />
         <Handle type="target" id="left-target"   position={Position.Left}   style={{ opacity: 0 }} />
         <Handle type="source" id="left-source"   position={Position.Left} />
+        {data.imageUrl && (
+          <div className={`node__image${imgError ? ' node__image--broken' : ''}`}>
+            {imgError ? <span>🖼</span> : <img src={data.imageUrl} alt="" onError={() => setImgError(true)} />}
+          </div>
+        )}
         <div className="node__badge">↑ Portal · L{data.layer ?? 0}</div>
         <div className="node__title">{displayTitle}</div>
         <Handle type="target" id="right-target"  position={Position.Right}  style={{ opacity: 0 }} />
@@ -94,6 +101,11 @@ export default function PortalNode({ data, selected }) {
       <Handle type="target" id="left-target"   position={Position.Left}   style={{ opacity: 0 }} />
       <Handle type="source" id="left-source"   position={Position.Left} />
 
+      {data.imageUrl && (
+        <div className={`node__image${imgError ? ' node__image--broken' : ''}`}>
+          {imgError ? <span>🖼</span> : <img src={data.imageUrl} alt="" onError={() => setImgError(true)} />}
+        </div>
+      )}
       <div className="node__badge">↗ Portal</div>
       <div className="node__title">{displayTitle}</div>
       {showDest && (

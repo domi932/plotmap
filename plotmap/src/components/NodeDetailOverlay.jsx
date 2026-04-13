@@ -216,6 +216,18 @@ function NodeDetailOverlayInner({ node, onClose, onChange, readOnly = false }) {
           </div>
         )}
 
+        {/* ── Full-size image ─────────────────────────────────────────── */}
+        {node.data.imageUrl && (
+          <div className="ndo__image">
+            <img
+              src={node.data.imageUrl}
+              alt=""
+              className="ndo__image-img"
+              onError={(e) => { e.currentTarget.style.display = 'none' }}
+            />
+          </div>
+        )}
+
         {/* ── Editor content area ─────────────────────────────────────── */}
         <div className="ndo__body">
           <EditorContent editor={editor} className="ndo__editor" />

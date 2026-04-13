@@ -1,5 +1,5 @@
 # PlotMap — Project Handoff & AI Prompt
-_A complete summary of the project as built so far, intended to onboard an AI assistant for further development. Updated after Short term A–E, the backend introduction (FastAPI + Supabase, cloud save/load, My Maps modal), Supabase Auth (email/password + Google OAuth, JWT validation, per-user map isolation), project restructure to `plotmap_project/`, `mapId` localStorage persistence, the publish flow, client-side routing with a public map viewer, the Landing page + My Maps full pages, the annotation system (Suggest mode), the V3 planning pass (bug fixes, omnidirectional handles, future community features), omnidirectional handles (Session 10), the V4 planning pass, Session 11 (remove Decision node, colour-as-background, shape selector), Session 12 (region node type), the V5 planning pass (production deployment, viewer annotations, polish, portal nodes, image attachments), Session 15 (production deployment: Vercel/Render config files, CORS + env-var audit, Procfile), Session 16 (viewer annotations: auth-aware AnnotationPanel in public MapViewer, node selection, sign-in prompt, mode toggle), Session 17 (production-readiness polish: character icon removal, skeleton loading states, Toast system, responsive mobile layout, meta tags + favicon, UX polish), and Session 18 (portal node type: cross-map linking)._
+_A complete summary of the project as built so far, intended to onboard an AI assistant for further development. Updated after Short term A–E, the backend introduction (FastAPI + Supabase, cloud save/load, My Maps modal), Supabase Auth (email/password + Google OAuth, JWT validation, per-user map isolation), project restructure to `plotmap_project/`, `mapId` localStorage persistence, the publish flow, client-side routing with a public map viewer, the Landing page + My Maps full pages, the annotation system (Suggest mode), the V3 planning pass (bug fixes, omnidirectional handles, future community features), omnidirectional handles (Session 10), the V4 planning pass, Session 11 (remove Decision node, colour-as-background, shape selector), Session 12 (region node type), the V5 planning pass (production deployment, viewer annotations, polish, portal nodes, image attachments), Session 15 (production deployment: Vercel/Render config files, CORS + env-var audit, Procfile), Session 16 (viewer annotations: auth-aware AnnotationPanel in public MapViewer, node selection, sign-in prompt, mode toggle), Session 17 (production-readiness polish: character icon removal, skeleton loading states, Toast system, responsive mobile layout, meta tags + favicon, UX polish), Session 18 (portal node type: cross-map linking), and Session 19 (image attachments on nodes: URL-based imageUrl field, canvas thumbnails, full-size NodeDetailOverlay preview)._
 
 ---
 
@@ -13,7 +13,7 @@ The long-term product has two core modes:
 
 ---
 
-## 2. Current State (Phase 18 — Portal node / cross-map linking)
+## 2. Current State (Phase 19 — Image attachments on nodes)
 
 A fully working **React + FastAPI application** has been built. The frontend runs via `npm run dev` (Vite dev server at localhost:5173). The backend runs via `python -m uvicorn main:app --reload` (FastAPI at localhost:8000) and persists maps to Supabase (PostgreSQL). Users must log in before using the app — every map is owned by its creator.
 
@@ -156,8 +156,18 @@ A fully working **React + FastAPI application** has been built. The frontend run
   - LandingPage, MyMapsPage, MapViewer all have `@media (max-width: 767px)` sections with tighter padding, stacking grids, and hidden email addresses.
 - **UX polish** — "Copy share link" button in the sidebar shows "✓ Copied!" for 2 s after copying (replaces old `alert()`). All sidebar buttons and drag tiles have `title` tooltip attributes. `alert()` calls throughout the app have been replaced with `addToast()`.
 
+#### Session 19 additions
+- **Image attachments on nodes (Phase 1 — URL-based)** — `data.imageUrl` (optional string) can be set on any non-region node type. The NodeEditor shows a new "Image URL" text field (below the shape picker, above the Layer dropdown; hidden for region nodes) followed by a 60×60 preview thumbnail and a "✕ Clear" button when a URL is set. Images render on the canvas in full render mode (`relLayer === 0`) and ghost mode (`relLayer === -1`). Canvas rendering is shape-aware:
+  - `rectangle` / `pill`: full-width ~60px banner at the top of the node, bleeding past padding with `border-radius: 8px 8px 0 0` (rectangle) or `16px 16px 0 0` (pill).
+  - `circle`: centered circular 56×56 portrait above the badge, `border-radius: 50%`.
+  - `diamond` / `hexagon`: centered 48×48 square thumbnail, `border-radius: 4px`.
+  - Ghost mode: same element, CSS reduces height to 44px and applies `opacity: 0.5`.
+  - Mini (`relLayer === 1`) and micro (`relLayer === 2`) modes: no image shown.
+- **Full-size image in NodeDetailOverlay** — when `data.imageUrl` is set, a full-width image (`max-height: 300px`, `object-fit: contain`) is rendered directly above the TipTap editor body (between the toolbar and the body). Works in both edit and read-only (viewer) mode.
+- **Error handling** — each node component holds local `imgError` state. If an `<img>` fires `onError`, `imgError` is set to `true` and the node renders a broken-image placeholder (`🖼` in a `.node__image--broken` container). NodeDetailOverlay hides the image element on error via inline style.
+- **No changes to MapViewer** — image thumbnails and overlay image render automatically via the shared node components already used there.
+
 ### What does NOT exist yet:
-- No image attachments on nodes
 - No real-time collaboration
 - No editorial rights / multi-user roles per map
 - No ownership transfer
@@ -295,7 +305,8 @@ Regular nodes (event / character / note):
     "shape": "diamond",
     "layer": 1,
     "parentNodeId": "5",
-    "detailContent": "{\"type\":\"doc\",\"content\":[...]}"
+    "detailContent": "{\"type\":\"doc\",\"content\":[...]}",
+    "imageUrl": "https://example.com/portrait.jpg"
   }
 }
 ```
@@ -304,6 +315,7 @@ Regular nodes (event / character / note):
 - `layer` — integer 0–4, defaults to 0 if absent (old saves without `layer` still load correctly)
 - `parentNodeId` — string ID of the owning node on `layer - 1`, or null
 - `detailContent` — `JSON.stringify`'d TipTap document; absent or null means no rich content
+- `imageUrl` — optional URL string. When non-empty, a thumbnail renders on the node canvas and a full-size image appears at the top of `NodeDetailOverlay`. Absent or empty = no image. Not supported on `region` nodes.
 
 Portal nodes:
 ```json
@@ -624,8 +636,7 @@ All five routes are now live:
 - "New map" button → `/editor`.
 
 ### Future product scope
-- **Portal node (cross-map linking)** — special node type linking to another PlotMap; enables book series and cinematic universe connections. Planned for Session 18.
-- **Image attachments on nodes** — paste URL or upload to Supabase Storage; thumbnail on node, full-size in overlay. Planned for Session 19.
+- **Image attachments — Phase 2** — file upload to Supabase Storage (replace URL input with a file picker; return a permanent storage URL stored in `data.imageUrl`).
 - **Editorial rights with approval queue** — map authors can grant editor access to other users; edits staged as pending changes.
 - **Author/ownership transfer** — transfer full map ownership to another user.
 - **Suggestion sticky notes** — visual badge on nodes in View mode showing annotation count; click to see suggestions.

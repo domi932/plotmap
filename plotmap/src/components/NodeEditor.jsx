@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../api.js'
 import { useToast } from './Toast.jsx'
 import MapLinkModal from './MapLinkModal.jsx'
@@ -23,6 +23,26 @@ const SHAPES = [
   { value: 'hexagon',   icon: '⬡', label: 'Hexagon'   },
   { value: 'pill',      icon: '⬮', label: 'Pill'      },
 ]
+
+function ImagePreview({ url, onClear }) {
+  const imgRef = useRef(null)
+  return (
+    <div className="node-editor__img-row">
+      <img
+        ref={imgRef}
+        src={url}
+        alt=""
+        className="node-editor__img-preview"
+        onError={(e) => { e.currentTarget.style.display = 'none' }}
+      />
+      {onClear && (
+        <button className="node-editor__img-clear" onClick={onClear} title="Clear image">
+          ✕ Clear
+        </button>
+      )}
+    </div>
+  )
+}
 
 export default function NodeEditor({ node, onChange, onDelete, onDuplicate, allNodes = [], readOnly = false }) {
   const addToast = useToast()
@@ -235,6 +255,27 @@ export default function NodeEditor({ node, onChange, onDelete, onDuplicate, allN
                   </button>
                 </div>
               </>
+            )}
+          </div>
+        )}
+
+        {/* ── Image URL (hidden for region nodes) ── */}
+        {node.type !== 'region' && (
+          <div className="node-editor__field">
+            <label className="node-editor__label">Image URL</label>
+            <input
+              className="node-editor__input"
+              type="text"
+              value={form.imageUrl || ''}
+              onChange={(e) => handleChange('imageUrl', e.target.value)}
+              placeholder="https://…"
+              readOnly={readOnly}
+            />
+            {form.imageUrl && (
+              <ImagePreview
+                url={form.imageUrl}
+                onClear={readOnly ? null : () => handleChange('imageUrl', '')}
+              />
             )}
           </div>
         )}

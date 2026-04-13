@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import './NodeBase.css'
 import { hasDetailContent, getNodeStyle } from './nodeUtils.js'
@@ -10,6 +11,7 @@ export default function CharacterNode({ data, selected }) {
   const relLayer = (data.layer ?? 0) - activeLayer
   const shape = data.shape ?? DEFAULT_SHAPE
   const nodeStyle = getNodeStyle(data.color)
+  const [imgError, setImgError] = useState(false)
 
   // ── Ghost ─────────────────────────────────────────────────────────────────
   if (relLayer === -1) {
@@ -23,6 +25,11 @@ export default function CharacterNode({ data, selected }) {
         <Handle type="source" id="top-source"    position={Position.Top} />
         <Handle type="target" id="left-target"   position={Position.Left}   style={{ opacity: 0 }} />
         <Handle type="source" id="left-source"   position={Position.Left} />
+        {data.imageUrl && (
+          <div className={`node__image${imgError ? ' node__image--broken' : ''}`}>
+            {imgError ? <span>🖼</span> : <img src={data.imageUrl} alt="" onError={() => setImgError(true)} />}
+          </div>
+        )}
         <div className="node__badge">↑ Character · L{data.layer ?? 0}</div>
         <div className="node__title">{data.title || 'Unnamed Character'}</div>
         {data.description && <div className="node__desc">{data.description}</div>}
@@ -83,6 +90,11 @@ export default function CharacterNode({ data, selected }) {
       <Handle type="source" id="top-source"    position={Position.Top} />
       <Handle type="target" id="left-target"   position={Position.Left}   style={{ opacity: 0 }} />
       <Handle type="source" id="left-source"   position={Position.Left} />
+      {data.imageUrl && (
+        <div className={`node__image${imgError ? ' node__image--broken' : ''}`}>
+          {imgError ? <span>🖼</span> : <img src={data.imageUrl} alt="" onError={() => setImgError(true)} />}
+        </div>
+      )}
       <div className="node__badge">Character</div>
       <div className="node__title">{data.title || 'Unnamed Character'}</div>
       {hasDetailContent(data.detailContent) && <div className="node__detail-hint">···</div>}

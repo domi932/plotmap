@@ -310,3 +310,39 @@
 }
 .node-editor__portal-go:hover:not(:disabled) { opacity: 0.85; }
 .node-editor__portal-go:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Image preview ───────────────────────────────────────────────────────── */
+.node-editor__img-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.node-editor__img-preview {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  display: block;
+}
+
+.node-editor__img-clear {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.15s, border-color 0.15s;
+  align-self: flex-start;
+}
+
+.node-editor__img-clear:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
