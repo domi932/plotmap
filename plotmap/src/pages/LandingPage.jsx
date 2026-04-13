@@ -12,6 +12,7 @@ export default function LandingPage() {
   const [user, setUser] = useState(null)
   const [showAuth, setShowAuth] = useState(false)
   const [recentMaps, setRecentMaps] = useState([])
+  const [loadingRecent, setLoadingRecent] = useState(false)
   const [publishedMaps, setPublishedMaps] = useState([])
   const [loadingPublished, setLoadingPublished] = useState(true)
 
@@ -32,7 +33,11 @@ export default function LandingPage() {
   // Load recent user maps when logged in
   useEffect(() => {
     if (!user) return
-    api.listMaps().then((maps) => setRecentMaps(maps.slice(0, 4))).catch(() => {})
+    setLoadingRecent(true)
+    api.listMaps()
+      .then((maps) => setRecentMaps(maps.slice(0, 4)))
+      .catch(() => {})
+      .finally(() => setLoadingRecent(false))
   }, [user])
 
   // Load published maps (public, no auth needed)
@@ -89,17 +94,25 @@ export default function LandingPage() {
       </section>
 
       {/* ── Recent maps strip (logged-in only) ── */}
-      {user && recentMaps.length > 0 && (
+      {user && (
         <section className="landing__section">
           <h2 className="landing__section-title">Your recent maps</h2>
-          <div className="landing__strip">
-            {recentMaps.map((m) => (
-              <Link key={m.id} to={`/editor/${m.id}`} className="landing__strip-tile">
-                <span className="landing__strip-title">{m.title}</span>
-                {m.is_published && <span className="landing__strip-badge">Published</span>}
-              </Link>
-            ))}
-          </div>
+          {loadingRecent ? (
+            <div className="landing__strip">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="landing__skeleton-tile" />
+              ))}
+            </div>
+          ) : recentMaps.length > 0 ? (
+            <div className="landing__strip">
+              {recentMaps.map((m) => (
+                <Link key={m.id} to={`/editor/${m.id}`} className="landing__strip-tile">
+                  <span className="landing__strip-title">{m.title}</span>
+                  {m.is_published && <span className="landing__strip-badge">Published</span>}
+                </Link>
+              ))}
+            </div>
+          ) : null}
         </section>
       )}
 
@@ -107,7 +120,11 @@ export default function LandingPage() {
       <section className="landing__section">
         <h2 className="landing__section-title">Published maps</h2>
         {loadingPublished ? (
-          <p className="landing__empty">Loading…</p>
+          <div className="landing__grid">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="landing__skeleton-card" />
+            ))}
+          </div>
         ) : publishedMaps.length === 0 ? (
           <p className="landing__empty">No published maps yet.</p>
         ) : (
@@ -132,7 +149,7 @@ export default function LandingPage() {
       {/* ── Auth overlay ── */}
       {showAuth && (
         <div className="landing__auth-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false) }}>
-          <AuthModal />
+          <AuthModal onClose={() => setShowAuth(false)} />
         </div>
       )}
     </div>

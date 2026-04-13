@@ -26,7 +26,7 @@ export default function CharacterNode({ data, selected }) {
         <div className="node__badge">↑ Character · L{data.layer ?? 0}</div>
         <div className="node__title">{data.title || 'Unnamed Character'}</div>
         {data.description && <div className="node__desc">{data.description}</div>}
-        {data.role && <div className="node__meta">🎭 {data.role}</div>}
+        {data.role && <div className="node__meta">{data.role}</div>}
         <Handle type="target" id="right-target"  position={Position.Right}  style={{ opacity: 0 }} />
         <Handle type="source" id="right-source"  position={Position.Right} />
         <Handle type="target" id="bottom-target" position={Position.Bottom} style={{ opacity: 0 }} />
@@ -87,7 +87,7 @@ export default function CharacterNode({ data, selected }) {
       <div className="node__title">{data.title || 'Unnamed Character'}</div>
       {hasDetailContent(data.detailContent) && <div className="node__detail-hint">···</div>}
       {data.description && <div className="node__desc">{data.description}</div>}
-      {data.role && <div className="node__meta">🎭 {data.role}</div>}
+      {data.role && <div className="node__meta">{data.role}</div>}
       <Handle type="target" id="right-target"  position={Position.Right}  style={{ opacity: 0 }} />
       <Handle type="source" id="right-source"  position={Position.Right} />
       <Handle type="target" id="bottom-target" position={Position.Bottom} style={{ opacity: 0 }} />

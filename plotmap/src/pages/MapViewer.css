@@ -117,7 +117,6 @@
   background: var(--surface);
 }
 
-/* AnnotationPanel fills the panel column; its own border-left is redundant here */
 .viewer__panel .ann-panel {
   flex: 1;
   width: 100%;
@@ -152,6 +151,7 @@
   font-size: 12px;
   font-weight: 600;
   padding: 6px 18px;
+  min-height: 36px;
   cursor: pointer;
   transition: opacity 0.15s;
   width: 100%;
@@ -182,6 +182,20 @@
   line-height: 1.5;
 }
 
+/* ── Loading spinner ─────────────────────────────────────────────────────── */
+.viewer__spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: viewer-spin 0.7s linear infinite;
+}
+
+@keyframes viewer-spin {
+  to { transform: rotate(360deg); }
+}
+
 .viewer__home-link {
   display: inline-block;
   margin-top: 8px;
@@ -192,4 +206,29 @@
 
 .viewer__home-link:hover {
   opacity: 0.8;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .viewer__body {
+    flex-direction: column;
+  }
+
+  .viewer__panel {
+    width: 100%;
+    min-width: 0;
+    height: 260px;
+    min-height: 260px;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .viewer__panel .ann-panel {
+    border-left: none;
+  }
+
+  .viewer__title {
+    font-size: 14px;
+  }
 }

@@ -23,6 +23,7 @@ import LayerIndicator from './components/LayerIndicator.jsx'
 import ModeToggle, { MODES } from './components/ModeToggle.jsx'
 import AuthModal from './components/AuthModal.jsx'
 import AnnotationPanel from './components/AnnotationPanel.jsx'
+import { useToast } from './components/Toast.jsx'
 import { api } from './api.js'
 import { supabase } from './supabase.js'
 import EventNode from './nodes/EventNode.jsx'
@@ -90,6 +91,7 @@ function isNodeVisible(node, activeLayer) {
 export default function App() {
   const navigate = useNavigate()
   const { mapId: routeMapId } = useParams()
+  const addToast = useToast()
 
   const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES)
   const [edges, setEdges, onEdgesChange] = useEdgesState(INITIAL_EDGES)
@@ -132,9 +134,11 @@ export default function App() {
   // ── Server-backed map identity ────────────────────────────────────────────
   // null  → map has never been saved to the server (new or imported from file)
   // uuid  → server-assigned ID; Save will call PUT /maps/{id}
-  const [mapId,       setMapId]       = useState(null)
-  const [isPublished, setIsPublished] = useState(false)
-  const [isSaving,    setIsSaving]    = useState(false)
+  const [mapId,        setMapId]        = useState(null)
+  const [isPublished,  setIsPublished]  = useState(false)
+  const [isSaving,     setIsSaving]     = useState(false)
+  const [isHydrating,  setIsHydrating]  = useState(false)
+  const [sidebarOpen,  setSidebarOpen]  = useState(false)
 
   // Persist mapId to localStorage so it survives page reloads.
   // Key is scoped per user to avoid cross-account bleed.
@@ -161,6 +165,7 @@ export default function App() {
       const stored = localStorage.getItem(`plotmap_mapid_${userId}`)
       if (stored) {
         setMapId(stored)
+        setIsHydrating(true)
         // Hydrate title and publish state from the server so they're accurate
         // on page load without requiring a manual save first.
         api.getMap(stored)
@@ -172,6 +177,7 @@ export default function App() {
             // Map was deleted from the server — clear the stale localStorage key.
             persistMapId(null)
           })
+          .finally(() => setIsHydrating(false))
       }
     }
   // onLoadFromServer is stable (useCallback with no deps that change), safe to include
@@ -656,12 +662,13 @@ export default function App() {
         setIsPublished(created.is_published ?? false)
       }
       isDirtyRef.current = false
+      addToast('Map saved', 'success')
     } catch (err) {
-      alert(`Save failed: ${err.message}\n\nMake sure the backend is running at ${import.meta.env.VITE_API_URL ?? 'http://localhost:8000'}.`)
+      addToast(`Failed to save: ${err.message}`, 'error')
     } finally {
       setIsSaving(false)
     }
-  }, [mapId, mapTitle, persistMapId])
+  }, [mapId, mapTitle, persistMapId, addToast])
 
   // Export to file: the original save-to-JSON behaviour, kept as a secondary option.
   const onExport = useCallback(() => {
@@ -687,7 +694,7 @@ export default function App() {
         persistMapId(null)   // imported from file → no server record
         setIsPublished(false)
       } catch {
-        alert('Could not read file. Make sure it is a valid PlotMap JSON file.')
+        addToast('Could not read file — make sure it is a valid PlotMap JSON file.', 'error')
       }
     }
     reader.readAsText(file)
@@ -696,6 +703,7 @@ export default function App() {
 
   // Load from server: fetches a map by ID and applies it.
   const onLoadFromServer = useCallback(async (id) => {
+    setIsHydrating(true)
     try {
       const map = await api.getMap(id)
       const { nodes: n = [], edges: e = [] } = map.graph_data ?? {}
@@ -703,9 +711,11 @@ export default function App() {
       persistMapId(map.id)
       setIsPublished(map.is_published ?? false)
     } catch (err) {
-      alert(`Could not load map: ${err.message}`)
+      addToast(`Could not load map: ${err.message}`, 'error')
+    } finally {
+      setIsHydrating(false)
     }
-  }, [applyLoadedGraph, persistMapId])
+  }, [applyLoadedGraph, persistMapId, addToast])
 
   // ── New Map ───────────────────────────────────────────────────────────────
   const [newMapDialogOpen, setNewMapDialogOpen] = useState(false)
@@ -786,10 +796,11 @@ export default function App() {
     try {
       await api.publishMap(mapId, next)
       setIsPublished(next)
+      addToast(next ? 'Map published' : 'Map unpublished', 'success')
     } catch (err) {
-      alert(`Could not update publish state: ${err.message}`)
+      addToast(`Could not update publish state: ${err.message}`, 'error')
     }
-  }, [mapId, isPublished])
+  }, [mapId, isPublished, addToast])
 
   // ── Right panel ───────────────────────────────────────────────────────────
   // View / Suggest → AnnotationPanel (read-only in View, interactive in Suggest)
@@ -848,13 +859,34 @@ export default function App() {
         mode={mode}
         user={user}
         onSignOut={onSignOut}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
+
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
 
       <div
         className="canvas-wrapper"
         ref={reactFlowWrapper}
         style={{ '--canvas-bg': bgColor }}
       >
+        <button
+          className="hamburger"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+          title="Open sidebar"
+        >
+          ☰
+        </button>
+
+        {isHydrating && (
+          <div className="canvas-hydrating">
+            <div className="canvas-hydrating__spinner" />
+          </div>
+        )}
+
         {/* Layer context wraps ReactFlow so all node components can read activeLayer */}
         <LayerContext.Provider value={activeLayer}>
           <ReactFlow
@@ -897,7 +929,9 @@ export default function App() {
         <ModeToggle mode={mode} onChange={setCurrentMode} />
       </div>
 
-      {rightPanel}
+      <div className={`right-panel${rightPanel ? ' right-panel--open' : ''}`}>
+        {rightPanel}
+      </div>
 
       {/* Context menus */}
       {paneMenu && (

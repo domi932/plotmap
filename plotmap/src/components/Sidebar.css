@@ -287,3 +287,53 @@
 .sidebar__tip strong {
   color: var(--accent-dim);
 }
+
+/* ── Close button (mobile only) ──────────────────────────────────── */
+.sidebar__close-btn {
+  display: none;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  z-index: 1;
+}
+.sidebar__close-btn:hover { color: var(--text); background: var(--border); }
+
+/* ── Mobile ──────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    min-width: 0;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+  }
+
+  .sidebar__close-btn {
+    display: block;
+  }
+
+  .sidebar__brand {
+    padding-right: 44px; /* room for close button */
+  }
+
+  .sidebar__btn,
+  .sidebar__node {
+    min-height: 44px;
+  }
+}

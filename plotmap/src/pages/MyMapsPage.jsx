@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase.js'
 import { api } from '../api.js'
+import { useToast } from '../components/Toast.jsx'
 import './MyMapsPage.css'
 
 function formatDate(iso) {
@@ -12,6 +13,7 @@ function formatDate(iso) {
 
 export default function MyMapsPage() {
   const navigate = useNavigate()
+  const addToast = useToast()
 
   // null = loading, false = not logged in, object = logged in
   const [user, setUser] = useState(null)
@@ -47,11 +49,13 @@ export default function MyMapsPage() {
 
   const handlePublishToggle = async (map) => {
     setBusyFor(map.id, true)
+    const next = !map.is_published
     try {
-      const updated = await api.publishMap(map.id, !map.is_published)
+      const updated = await api.publishMap(map.id, next)
       setMaps((prev) => prev.map((m) => (m.id === map.id ? { ...m, is_published: updated.is_published } : m)))
+      addToast(next ? 'Map published' : 'Map unpublished')
     } catch (err) {
-      alert(`Could not update map: ${err.message}`)
+      addToast(`Could not update map: ${err.message}`, 'error')
     } finally {
       setBusyFor(map.id, false)
     }
@@ -63,8 +67,9 @@ export default function MyMapsPage() {
     try {
       await api.deleteMap(map.id)
       setMaps((prev) => prev.filter((m) => m.id !== map.id))
+      addToast('Map deleted')
     } catch (err) {
-      alert(`Could not delete map: ${err.message}`)
+      addToast(`Could not delete map: ${err.message}`, 'error')
     } finally {
       setBusyFor(map.id, false)
     }
@@ -97,10 +102,14 @@ export default function MyMapsPage() {
       {/* ── Content ── */}
       <main className="mymaps__main">
         {loading ? (
-          <p className="mymaps__empty">Loading…</p>
+          <div className="mymaps__grid">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="mymaps__skeleton-card" />
+            ))}
+          </div>
         ) : maps.length === 0 ? (
           <div className="mymaps__empty-state">
-            <p className="mymaps__empty">No maps yet.</p>
+            <p className="mymaps__empty">No maps yet — create your first one!</p>
             <button className="mymaps__btn mymaps__btn--accent" onClick={() => navigate('/editor')}>
               Create your first map
             </button>
@@ -119,6 +128,7 @@ export default function MyMapsPage() {
                     className="mymaps__btn mymaps__btn--primary"
                     onClick={() => navigate(`/editor/${m.id}`)}
                     disabled={busy[m.id]}
+                    title="Open in editor"
                   >
                     Open
                   </button>
@@ -126,6 +136,7 @@ export default function MyMapsPage() {
                     className="mymaps__btn mymaps__btn--ghost"
                     onClick={() => handlePublishToggle(m)}
                     disabled={busy[m.id]}
+                    title={m.is_published ? 'Unpublish this map' : 'Publish this map publicly'}
                   >
                     {m.is_published ? 'Unpublish' : 'Publish'}
                   </button>
@@ -133,6 +144,7 @@ export default function MyMapsPage() {
                     className="mymaps__btn mymaps__btn--danger"
                     onClick={() => handleDelete(m)}
                     disabled={busy[m.id]}
+                    title="Delete this map permanently"
                   >
                     Delete
                   </button>

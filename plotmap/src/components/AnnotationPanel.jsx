@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../api.js'
+import { useToast } from './Toast.jsx'
 import './AnnotationPanel.css'
 
 const TYPE_CONFIG = {
@@ -15,6 +16,7 @@ function formatAuthor(email) {
 }
 
 export default function AnnotationPanel({ mapId, nodeId, mode, user }) {
+  const addToast = useToast()
   const [annotations, setAnnotations] = useState([])
   const [loading,     setLoading]     = useState(false)
   const [content,     setContent]     = useState('')
@@ -57,8 +59,10 @@ export default function AnnotationPanel({ mapId, nodeId, mode, user }) {
         [ann, ...prev].sort((a, b) => b.upvotes - a.upvotes)
       )
       setContent('')
+      addToast('Annotation submitted', 'success')
     } catch (err) {
       setError(err.message)
+      addToast('Failed to submit annotation', 'error')
     } finally {
       setSubmitting(false)
     }

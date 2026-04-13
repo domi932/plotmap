@@ -146,7 +146,7 @@ export default function MapViewer() {
   if (status === 'loading') {
     return (
       <div className="viewer viewer--state">
-        <p className="viewer__state-text">Loading…</p>
+        <div className="viewer__spinner" aria-label="Loading map" />
       </div>
     )
   }

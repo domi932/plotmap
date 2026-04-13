@@ -49,7 +49,8 @@
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .landing__btn {
-  padding: 6px 16px;
+  padding: 8px 16px;
+  min-height: 36px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
@@ -99,7 +100,8 @@
 
 .landing__cta {
   margin-top: 8px;
-  padding: 12px 32px;
+  padding: 13px 32px;
+  min-height: 48px;
   background: var(--accent);
   color: #fff;
   border: none;
@@ -174,6 +176,15 @@
   color: var(--accent);
 }
 
+/* ── Skeleton tile (recent strip) ────────────────────────────────────────── */
+.landing__skeleton-tile {
+  min-width: 160px;
+  max-width: 200px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
 /* ── Published grid ──────────────────────────────────────────────────────── */
 .landing__grid {
   display: grid;
@@ -208,7 +219,8 @@
 .landing__card-btn {
   display: inline-block;
   margin-top: 8px;
-  padding: 5px 14px;
+  padding: 6px 14px;
+  min-height: 32px;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 5px;
@@ -220,6 +232,30 @@
 }
 .landing__card-btn:hover { border-color: var(--accent); }
 
+/* ── Skeleton card (published grid) ─────────────────────────────────────── */
+.landing__skeleton-card {
+  height: 120px;
+  border-radius: 8px;
+}
+
+/* ── Shimmer animation (applied to both skeleton types) ─────────────────── */
+.landing__skeleton-tile,
+.landing__skeleton-card {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--border)  50%,
+    var(--surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: landing-shimmer 1.4s infinite;
+}
+
+@keyframes landing-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
 /* ── Auth overlay ────────────────────────────────────────────────────────── */
 .landing__auth-overlay {
   position: fixed;
@@ -229,4 +265,32 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .landing__header {
+    padding: 0 16px;
+    height: 52px;
+  }
+
+  .landing__user-email { display: none; }
+
+  .landing__hero {
+    padding: 48px 20px 40px;
+  }
+
+  .landing__section {
+    padding: 0 16px 36px;
+  }
+
+  .landing__grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .landing__btn {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
 }
