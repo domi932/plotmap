@@ -23,6 +23,25 @@
 .node--event     { background: var(--node-event);     border-color: var(--node-event-border); }
 .node--character { background: var(--node-character); border-color: var(--node-character-border); }
 .node--note      { background: var(--node-note);      border-color: var(--node-note-border); }
+.node--portal    {
+  background: var(--node-portal);
+  border-color: var(--node-portal-border);
+  border-style: dashed;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 12px rgba(58,138,138,0.2);
+}
+.node--portal:hover {
+  box-shadow: 0 6px 28px rgba(0,0,0,0.55), 0 0 18px rgba(58,138,138,0.38);
+}
+.node--portal.node--selected {
+  border-color: var(--accent) !important;
+  border-style: dashed !important;
+}
+.node__portal-unlinked {
+  font-size: 11px;
+  color: #c8a96e;
+  margin-top: 6px;
+  opacity: 0.75;
+}
 
 .node__badge {
   font-size: 10px;
@@ -110,6 +129,7 @@
 .node--micro.node--event     { border-color: var(--node-event);     background: var(--node-event);     opacity: 0.75; }
 .node--micro.node--character { border-color: var(--node-character); background: var(--node-character); opacity: 0.75; }
 .node--micro.node--note      { border-color: var(--node-note);      background: var(--node-note);      opacity: 0.75; }
+.node--micro.node--portal    { border-color: var(--node-portal);    background: var(--node-portal);    opacity: 0.75; }
 
 /* Micro nodes with custom colour override */
 .node--micro[style*="background"] { opacity: 0.8; }

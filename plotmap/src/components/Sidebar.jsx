@@ -6,6 +6,7 @@ const NODE_TYPES = [
   { type: 'character', label: 'Character', icon: '🎭', description: 'A person or entity' },
   { type: 'note',      label: 'Note',      icon: '📝', description: 'A free annotation' },
   { type: 'region',    label: 'Region',    icon: '▭',  description: 'A background grouping area' },
+  { type: 'portal',    label: 'Portal',    icon: '↗',  description: 'Link to another map' },
 ]
 
 export default function Sidebar({
@@ -78,7 +79,7 @@ export default function Sidebar({
                 className={`sidebar__node sidebar__node--${n.type}`}
                 draggable
                 onDragStart={(e) => onDragStart(e, n.type)}
-                title={`Drag to add a ${n.label} node (or press ${n.type === 'event' ? 'E' : n.type === 'character' ? 'C' : n.type === 'note' ? 'N' : ''})`}
+                title={`Drag to add a ${n.label} node${n.type === 'event' ? ' (or press E)' : n.type === 'character' ? ' (or press C)' : n.type === 'note' ? ' (or press N)' : n.type === 'portal' ? ' (or press P)' : ''}`}
               >
                 <span className="sidebar__node-icon">{n.icon}</span>
                 <div>

@@ -22,6 +22,8 @@
   --node-character-border: #4a294a;
   --node-note:             #8a6a3a;
   --node-note-border:      #614a29;
+  --node-portal:           #3a8a8a;
+  --node-portal-border:    #295f5f;
   --node-plothole:         #8a3a3a;
 
   font-family: 'DM Sans', sans-serif;

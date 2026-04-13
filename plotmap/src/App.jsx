@@ -30,6 +30,7 @@ import EventNode from './nodes/EventNode.jsx'
 import CharacterNode from './nodes/CharacterNode.jsx'
 import NoteNode from './nodes/NoteNode.jsx'
 import RegionNode from './nodes/RegionNode.jsx'
+import PortalNode from './nodes/PortalNode.jsx'
 import { LayerContext } from './LayerContext.js'
 import './App.css'
 
@@ -38,6 +39,7 @@ const nodeTypes = {
   character: CharacterNode,
   note: NoteNode,
   region: RegionNode,
+  portal: PortalNode,
 }
 
 const INITIAL_NODES = [
@@ -58,7 +60,7 @@ const INITIAL_EDGES = [
 
 let nodeIdCounter = 100
 
-const DEFAULT_SHAPES = { event: 'rectangle', character: 'circle', note: 'rectangle' }
+const DEFAULT_SHAPES = { event: 'rectangle', character: 'circle', note: 'rectangle', portal: 'rectangle' }
 
 // ── Dagre auto-layout ──────────────────────────────────────────────────────
 const NODE_WIDTH  = 200
@@ -408,10 +410,15 @@ export default function App() {
 
   // ── Selection ─────────────────────────────────────────────────────────────
   const onNodeClick = useCallback((_e, node) => {
+    // In View mode, clicking a linked portal navigates to the target map
+    if (modeRef.current === MODES.VIEW && node.type === 'portal' && node.data?.targetMapId) {
+      navigate(`/map/${node.data.targetMapId}`)
+      return
+    }
     setSelectedNode(node)
     setSelectedEdge(null)
     closeMenus()
-  }, [closeMenus])
+  }, [closeMenus, navigate])
 
   const onEdgeClick = useCallback((_e, edge) => {
     setSelectedEdge(edge)
@@ -449,6 +456,7 @@ export default function App() {
     if (!isEditing()) return
     pushHistory()
     const isRegion = type === 'region'
+    const isPortal = type === 'portal'
     const newNode = {
       id: String(++nodeIdCounter),
       type,
@@ -456,6 +464,8 @@ export default function App() {
       ...(isRegion ? { style: { width: 400, height: 300 }, zIndex: -1000 } : {}),
       data: isRegion
         ? { title: '', color: '', layer: activeLayerRef.current }
+        : isPortal
+        ? { label: '', targetMapId: '', targetMapTitle: '', color: '', shape: 'rectangle', layer: activeLayerRef.current }
         : { title: '', description: '', layer: activeLayerRef.current, shape: DEFAULT_SHAPES[type] ?? 'rectangle' },
     }
     setNodes((nds) => nds.concat(newNode))
@@ -500,6 +510,7 @@ export default function App() {
 
       pushHistory()
       const isRegion = type === 'region'
+      const isPortal = type === 'portal'
       const newNode = {
         id: String(++nodeIdCounter),
         type,
@@ -507,6 +518,8 @@ export default function App() {
         ...(isRegion ? { style: { width: 400, height: 300 }, zIndex: -1000 } : {}),
         data: isRegion
           ? { title: '', color: '', layer: activeLayerRef.current }
+          : isPortal
+          ? { label: '', targetMapId: '', targetMapTitle: '', color: '', shape: 'rectangle', layer: activeLayerRef.current }
           : { title: '', description: '', layer: activeLayerRef.current, shape: DEFAULT_SHAPES[type] ?? 'rectangle' },
       }
       setNodes((nds) => nds.concat(newNode))
@@ -587,7 +600,7 @@ export default function App() {
 
   // ── Keyboard shortcuts for node types ─────────────────────────────────────
   useEffect(() => {
-    const TYPE_KEYS = { e: 'event', c: 'character', n: 'note' }
+    const TYPE_KEYS = { e: 'event', c: 'character', n: 'note', p: 'portal' }
     const onKey = (ev) => {
       if (!isEditing()) return
       if (ev.ctrlKey || ev.metaKey || ev.altKey) return
@@ -605,12 +618,10 @@ export default function App() {
       const position = { x: (cx - x) / zoom, y: (cy - y) / zoom }
 
       pushHistory()
-      const newNode = {
-        id: String(++nodeIdCounter),
-        type,
-        position,
-        data: { title: '', description: '', layer: activeLayerRef.current, shape: DEFAULT_SHAPES[type] ?? 'rectangle' },
-      }
+      const data = type === 'portal'
+        ? { label: '', targetMapId: '', targetMapTitle: '', color: '', shape: 'rectangle', layer: activeLayerRef.current }
+        : { title: '', description: '', layer: activeLayerRef.current, shape: DEFAULT_SHAPES[type] ?? 'rectangle' }
+      const newNode = { id: String(++nodeIdCounter), type, position, data }
       setNodes((nds) => nds.concat(newNode))
       setSelectedNode(newNode)
       setSelectedEdge(null)
@@ -751,6 +762,7 @@ export default function App() {
     { icon: '🎭', label: 'Add Character', action: () => addNodeAtPosition('character', paneMenu.flowPos) },
     { icon: '📝', label: 'Add Note',      action: () => addNodeAtPosition('note',      paneMenu.flowPos) },
     { icon: '▭',  label: 'Add Region',    action: () => addNodeAtPosition('region',    paneMenu.flowPos) },
+    { icon: '↗',  label: 'Add Portal',    action: () => addNodeAtPosition('portal',    paneMenu.flowPos) },
     { type: 'divider' },
     {
       icon: '🎨',
@@ -915,7 +927,7 @@ export default function App() {
             <MiniMap
               nodeColor={(n) => {
                 if (n.data?.color) return n.data.color
-                const map = { event: '#3a5a8a', character: '#6a3a6a', note: '#8a6a3a', region: '#404060' }
+                const map = { event: '#3a5a8a', character: '#6a3a6a', note: '#8a6a3a', region: '#404060', portal: '#3a8a8a' }
                 return map[n.type] || '#444'
               }}
               maskColor="rgba(15,14,17,0.7)"

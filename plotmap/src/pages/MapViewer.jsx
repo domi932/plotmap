@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   ReactFlow,
   Background,
@@ -13,6 +13,7 @@ import EventNode          from '../nodes/EventNode.jsx'
 import CharacterNode      from '../nodes/CharacterNode.jsx'
 import NoteNode           from '../nodes/NoteNode.jsx'
 import RegionNode         from '../nodes/RegionNode.jsx'
+import PortalNode         from '../nodes/PortalNode.jsx'
 import { LayerContext }   from '../LayerContext.js'
 import LayerIndicator     from '../components/LayerIndicator.jsx'
 import NodeDetailOverlay  from '../components/NodeDetailOverlay.jsx'
@@ -27,6 +28,7 @@ const nodeTypes = {
   character: CharacterNode,
   note:      NoteNode,
   region:    RegionNode,
+  portal:    PortalNode,
 }
 
 // Identical visibility logic to App.jsx — show primary window + ghost layer.
@@ -69,6 +71,7 @@ function useVisibleGraph(nodes, edges, activeLayer) {
 
 export default function MapViewer() {
   const { mapId } = useParams()
+  const navigate  = useNavigate()
   const [status,       setStatus]       = useState('loading')
   const [title,        setTitle]        = useState('')
   const [nodes,        setNodes]        = useState([])
@@ -126,11 +129,16 @@ export default function MapViewer() {
 
   // ── Interaction handlers ──────────────────────────────────────────────────────
   const onNodeClick = useCallback((_e, node) => {
+    // Portal: navigate to the linked map
+    if (node.type === 'portal' && node.data?.targetMapId) {
+      navigate(`/map/${node.data.targetMapId}`)
+      return
+    }
     // Ghost layer navigation
     const relLayer = (node.data?.layer ?? 0) - activeLayer
     if (relLayer === -1) setActiveLayer(node.data.layer)
     setSelectedNode(node)
-  }, [activeLayer])
+  }, [activeLayer, navigate])
 
   const onNodeDoubleClick = useCallback((_e, node) => {
     setDetailNode(node)

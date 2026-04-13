@@ -5,6 +5,7 @@ const TYPE_COLORS = {
   event:     '#3a5a8a',
   character: '#6a3a6a',
   note:      '#8a6a3a',
+  portal:    '#3a8a8a',
 }
 
 export default function ConnectToModal({ sourceNode, nodes, edges, onConnect, onClose }) {

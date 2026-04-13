@@ -1,5 +1,5 @@
 # PlotMap — Project Handoff & AI Prompt
-_A complete summary of the project as built so far, intended to onboard an AI assistant for further development. Updated after Short term A–E, the backend introduction (FastAPI + Supabase, cloud save/load, My Maps modal), Supabase Auth (email/password + Google OAuth, JWT validation, per-user map isolation), project restructure to `plotmap_project/`, `mapId` localStorage persistence, the publish flow, client-side routing with a public map viewer, the Landing page + My Maps full pages, the annotation system (Suggest mode), the V3 planning pass (bug fixes, omnidirectional handles, future community features), omnidirectional handles (Session 10), the V4 planning pass, Session 11 (remove Decision node, colour-as-background, shape selector), Session 12 (region node type), the V5 planning pass (production deployment, viewer annotations, polish, portal nodes, image attachments), Session 15 (production deployment: Vercel/Render config files, CORS + env-var audit, Procfile), Session 16 (viewer annotations: auth-aware AnnotationPanel in public MapViewer, node selection, sign-in prompt, mode toggle), and Session 17 (production-readiness polish: character icon removal, skeleton loading states, Toast system, responsive mobile layout, meta tags + favicon, UX polish)._
+_A complete summary of the project as built so far, intended to onboard an AI assistant for further development. Updated after Short term A–E, the backend introduction (FastAPI + Supabase, cloud save/load, My Maps modal), Supabase Auth (email/password + Google OAuth, JWT validation, per-user map isolation), project restructure to `plotmap_project/`, `mapId` localStorage persistence, the publish flow, client-side routing with a public map viewer, the Landing page + My Maps full pages, the annotation system (Suggest mode), the V3 planning pass (bug fixes, omnidirectional handles, future community features), omnidirectional handles (Session 10), the V4 planning pass, Session 11 (remove Decision node, colour-as-background, shape selector), Session 12 (region node type), the V5 planning pass (production deployment, viewer annotations, polish, portal nodes, image attachments), Session 15 (production deployment: Vercel/Render config files, CORS + env-var audit, Procfile), Session 16 (viewer annotations: auth-aware AnnotationPanel in public MapViewer, node selection, sign-in prompt, mode toggle), Session 17 (production-readiness polish: character icon removal, skeleton loading states, Toast system, responsive mobile layout, meta tags + favicon, UX polish), and Session 18 (portal node type: cross-map linking)._
 
 ---
 
@@ -13,7 +13,7 @@ The long-term product has two core modes:
 
 ---
 
-## 2. Current State (Phase 17 — Production-readiness polish)
+## 2. Current State (Phase 18 — Portal node / cross-map linking)
 
 A fully working **React + FastAPI application** has been built. The frontend runs via `npm run dev` (Vite dev server at localhost:5173). The backend runs via `python -m uvicorn main:app --reload` (FastAPI at localhost:8000) and persists maps to Supabase (PostgreSQL). Users must log in before using the app — every map is owned by its creator.
 
@@ -21,11 +21,12 @@ A fully working **React + FastAPI application** has been built. The frontend run
 - A **React Flow canvas** (using `@xyflow/react` v12) that fills the centre of the screen
 - **Drag-and-drop** from the left sidebar onto the canvas to create new nodes
 - **Keyboard shortcuts** — press **E**, **C**, or **N** (when no input/textarea/select/contenteditable is focused and mode is Edit) to instantly add an Event, Character, or Note node at the visible canvas centre
-- **Four custom node types**:
+- **Five custom node types**:
   - `event` — a plot point or story beat (fields: title, description, time/chapter). Default shape: rectangle.
   - `character` — a person or entity (fields: name, description, role). Default shape: circle.
   - `note` — a free annotation (fields: title, content). Default shape: rectangle.
   - `region` — a decorative background grouping area (field: label/title). No handles, no connections. Resizable via `NodeResizer`. Semi-transparent fill, configurable colour, `zIndex: -1000` so other nodes render on top. Only renders at its own layer (`relLayer === 0`). Excluded from dagre auto-layout.
+  - `portal` — a cross-map link gateway (fields: label, targetMapId, targetMapTitle). Teal colour (`--node-portal: #3a8a8a`), dashed border with glow. Full omnidirectional handles. In View mode (editor) and public viewer, clicking navigates to `/map/{targetMapId}`. In Edit mode, clicking selects normally. The NodeEditor shows a "Linked map" section with a "Link a map…" button (opens `MapLinkModal`), a paste-URL input, and a "Clear link" button.
 - **Node colour as background**: `data.color` is applied as `backgroundColor` on the node. The border is auto-derived (30% darker shade via JS). Text colour auto-flips based on background luminance (light text on dark bg, dark text on light bg). When `data.color` is absent, CSS variable defaults (`--node-event`, `--node-character`, `--node-note`) supply the background.
 - **Node shape selector**: `data.shape` controls the node shape. Supported values: `'rectangle'` (default), `'circle'`, `'diamond'`, `'hexagon'`, `'pill'`. A 5-button shape picker row appears in the NodeEditor below the colour swatches. All render modes (full, mini, ghost) respect the shape. Character nodes default to `'circle'`; Event and Note default to `'rectangle'`. Old saved nodes without `data.shape` render as `'rectangle'`.
 - **Connecting nodes**: drag from any handle on any side of any node to any handle on any side of any other node. Connections are fully omnidirectional — each side has both a source and target handle co-located so any topology is possible.
@@ -160,7 +161,6 @@ A fully working **React + FastAPI application** has been built. The frontend run
 - No real-time collaboration
 - No editorial rights / multi-user roles per map
 - No ownership transfer
-- No cross-map linking (portal nodes)
 
 ---
 
@@ -236,6 +236,7 @@ Data/2026/plotmap_project/
         │   ├── CharacterNode.jsx — Character node: same 4 modes (default shape: circle)
         │   ├── NoteNode.jsx     — Note node: same 4 modes
         │   ├── RegionNode.jsx   — Region node: background grouping rectangle with NodeResizer; only renders at relLayer===0
+        │   ├── PortalNode.jsx   — Portal node: cross-map link; teal dashed glow border; navigates on click in View/viewer
         │   ├── RegionNode.css   — Region node styles (.region, .region--selected, .region__label)
         │   ├── NodeBase.css     — Shared node styles incl. .node--ghost, .node--mini, .node--micro, shape classes
         │   └── nodeUtils.js     — hasDetailContent(), getNodeStyle() (colour-as-background + text flip) helpers
@@ -250,8 +251,10 @@ Data/2026/plotmap_project/
             ├── EdgeEditor.css   — EdgeEditor styles
             ├── ContextMenu.jsx  — Reusable positioned context menu (viewport-edge aware)
             ├── ContextMenu.css  — Context menu styles
-            ├── ConnectToModal.jsx — Searchable node-picker modal for "Connect to…"
+            ├── ConnectToModal.jsx — Searchable node-picker modal for "Connect to…"; TYPE_COLORS includes portal
             ├── ConnectToModal.css — ConnectToModal styles
+            ├── MapLinkModal.jsx  — Modal for linking a map to a portal; fetches GET /maps + GET /maps/published; dedupes by id
+            ├── MapLinkModal.css  — MapLinkModal styles
             ├── NodeDetailOverlay.jsx — TipTap rich-text overlay (double-click to open)
             ├── NodeDetailOverlay.css — Overlay styles incl. full ProseMirror dark-theme overrides
             ├── LayerIndicator.jsx — Layer HUD (absolute top-left of canvas)
@@ -301,6 +304,30 @@ Regular nodes (event / character / note):
 - `layer` — integer 0–4, defaults to 0 if absent (old saves without `layer` still load correctly)
 - `parentNodeId` — string ID of the owning node on `layer - 1`, or null
 - `detailContent` — `JSON.stringify`'d TipTap document; absent or null means no rich content
+
+Portal nodes:
+```json
+{
+  "id": "p1",
+  "type": "portal",
+  "position": { "x": 500, "y": 200 },
+  "data": {
+    "label": "Continue in The Two Towers",
+    "targetMapId": "abc-123-def-456",
+    "targetMapTitle": "The Two Towers",
+    "color": null,
+    "shape": "rectangle",
+    "layer": 0,
+    "parentNodeId": null
+  }
+}
+```
+- `label` — optional custom display text. When blank, `targetMapTitle` is shown as the node title.
+- `targetMapId` — UUID of the destination map. When set, clicking the node in View mode or the public viewer navigates to `/map/{targetMapId}`.
+- `targetMapTitle` — cached title of the destination map (stored at link time so the node renders correctly offline / without an extra fetch).
+- When `targetMapId` is empty, the node renders with a "⚠ Not linked" indicator.
+- Portals participate in dagre auto-layout, omnidirectional handles, shape selector, colour override, and the Connect-to modal.
+- Portals do **not** have `title`, `description`, or `time` fields.
 
 Region nodes differ in structure:
 ```json
@@ -434,6 +461,7 @@ Two `useEffect` handlers in `App.jsx`. E/C/N: fires when mode is `'edit'`, no in
 | E | Add Event node at canvas centre (on `activeLayer`) |
 | C | Add Character node at canvas centre (on `activeLayer`) |
 | N | Add Note node at canvas centre (on `activeLayer`) |
+| P | Add Portal node at canvas centre (on `activeLayer`) |
 | Ctrl+Z | Undo |
 | Ctrl+Y / Ctrl+Shift+Z | Redo |
 | Ctrl+A | Select all nodes in the current layer window (visible nodes only) |
@@ -546,6 +574,8 @@ The app uses a **dark editorial aesthetic** with CSS custom properties defined i
 --node-character-border: #4a294a
 --node-note:             #8a6a3a   /* amber background */
 --node-note-border:      #614a29
+--node-portal:           #3a8a8a   /* teal background */
+--node-portal-border:    #295f5f
 ```
 
 `getNodeStyle(color)` in `nodeUtils.js` is used by all node components to compute the inline style object for custom colour overrides. It derives `borderColor` (30% darker), `--text`, `--text-muted`, and `--accent-dim` CSS variables overrides for luminance-based text flipping. When `color` is falsy (no override), the function returns `undefined` and the CSS-variable defaults apply.
@@ -556,17 +586,16 @@ Fonts: **Playfair Display** (serif, for titles/node headings) + **DM Sans** (san
 
 ## 7. Suggested Next Steps (in priority order)
 
-### Near term — Cross-map & media
-1. **Portal node — cross-map linking** — A new `portal` node type that links to another PlotMap. Stores a target `mapId`. In View mode, clicking navigates to `/map/{targetMapId}`. In Edit mode, NodeEditor shows a paste/search UI to link a published map. Enables book series, cinematic universes, and collaborative story arcs.
-2. **Image attachments on nodes** — Allow users to attach images to nodes. Phase 1: paste a URL, store as `data.imageUrl`, render a thumbnail on the node face and full-size in the detail overlay. Phase 2: upload images to Supabase Storage, return a public URL. Useful for fan art, character portraits, location photos, event illustrations.
-3. **Alembic migrations** — Add proper versioned migrations for future schema changes.
+### Near term — Media & data quality
+1. **Image attachments on nodes** — Allow users to attach images to nodes. Phase 1: paste a URL, store as `data.imageUrl`, render a thumbnail on the node face and full-size in the detail overlay. Phase 2: upload images to Supabase Storage, return a public URL. Useful for fan art, character portraits, location photos, event illustrations.
+2. **Alembic migrations** — Add proper versioned migrations for future schema changes.
 
 ### Later — Community & collaboration features
-4. **Editorial rights with approval queue** — Map authors grant "editor" rights to other users. Edits are staged as pending changes (similar to pull requests). Author approves or rejects. Requires: `map_collaborators` table, `pending_edits` table, and review UI.
-5. **Author/ownership transfer** — Transfer full map ownership to another user. Requires: transfer endpoint, receiving-user confirmation, audit trail.
-6. **Suggestion sticky notes in viewer** — Visual badge on nodes showing annotation count; click to see suggestions inline.
-7. **NetworkX analysis** — Backend Python job analysing graph structure: orphaned nodes, circular dependencies, unreachable nodes, characters with no connections after introduction.
-8. **Real-time collaboration** — Yjs + React Flow WebSocket integration for multi-user live editing.
+3. **Editorial rights with approval queue** — Map authors grant "editor" rights to other users. Edits are staged as pending changes (similar to pull requests). Author approves or rejects. Requires: `map_collaborators` table, `pending_edits` table, and review UI.
+4. **Author/ownership transfer** — Transfer full map ownership to another user. Requires: transfer endpoint, receiving-user confirmation, audit trail.
+5. **Suggestion sticky notes in viewer** — Visual badge on nodes showing annotation count; click to see suggestions inline.
+6. **NetworkX analysis** — Backend Python job analysing graph structure: orphaned nodes, circular dependencies, unreachable nodes, characters with no connections after introduction.
+7. **Real-time collaboration** — Yjs + React Flow WebSocket integration for multi-user live editing.
 
 ---
 

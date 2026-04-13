@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { api } from '../api.js'
+import { useToast } from './Toast.jsx'
+import MapLinkModal from './MapLinkModal.jsx'
 import './NodeEditor.css'
 
 const FIELD_MAP = {
@@ -6,6 +9,7 @@ const FIELD_MAP = {
   character: [{ key: 'title', label: 'Name',  type: 'text' }, { key: 'description', label: 'Description', type: 'textarea' }, { key: 'role', label: 'Role (e.g. Protagonist)', type: 'text' }],
   note:      [{ key: 'title', label: 'Title', type: 'text' }, { key: 'description', label: 'Content', type: 'textarea' }],
   region:    [{ key: 'title', label: 'Label', type: 'text' }],
+  portal:    [{ key: 'label', label: 'Display label', type: 'text' }],
 }
 
 const LAYER_NAMES = ['Main Story', 'Subplot A', 'Subplot B', 'Subplot C', 'Subplot D']
@@ -21,10 +25,15 @@ const SHAPES = [
 ]
 
 export default function NodeEditor({ node, onChange, onDelete, onDuplicate, allNodes = [], readOnly = false }) {
-  const [form, setForm] = useState({})
+  const addToast = useToast()
+  const [form,          setForm]          = useState({})
+  const [showLinkModal, setShowLinkModal] = useState(false)
+  const [pasteValue,    setPasteValue]    = useState('')
+  const [pasting,       setPasting]       = useState(false)
 
   useEffect(() => {
     setForm(node?.data || {})
+    setPasteValue('')
   }, [node?.id])
 
   if (!node) {
@@ -44,6 +53,39 @@ export default function NodeEditor({ node, onChange, onDelete, onDuplicate, allN
     if (key === 'layer' && value === 0) updated.parentNodeId = null
     setForm(updated)
     onChange(node.id, updated)
+  }
+
+  // ── Portal helpers ────────────────────────────────────────────────────────
+  const handleMapLink = (id, title) => {
+    const updated = { ...form, targetMapId: id, targetMapTitle: title }
+    setForm(updated)
+    onChange(node.id, updated)
+  }
+
+  const handleMapClear = () => {
+    const updated = { ...form, targetMapId: '', targetMapTitle: '' }
+    setForm(updated)
+    onChange(node.id, updated)
+  }
+
+  const handlePasteLink = async () => {
+    const raw = pasteValue.trim()
+    if (!raw) return
+    // Accept full URLs like /map/<uuid> or bare UUIDs
+    const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+    const match = raw.match(UUID_RE)
+    const id = match ? match[0] : raw
+    setPasting(true)
+    try {
+      const map = await api.getPublicMap(id)
+      handleMapLink(map.id, map.title || '')
+      setPasteValue('')
+      addToast(`Linked to "${map.title}"`, 'success')
+    } catch {
+      addToast('Map not found — make sure the URL is correct and the map is published.', 'error')
+    } finally {
+      setPasting(false)
+    }
   }
 
   // Nodes eligible to be the parent: on the layer directly above the current node
@@ -145,6 +187,58 @@ export default function NodeEditor({ node, onChange, onDelete, onDuplicate, allN
           </div>
         )}
 
+        {/* ── Portal link (portal nodes only) ── */}
+        {node.type === 'portal' && (
+          <div className="node-editor__field">
+            <label className="node-editor__label">Linked map</label>
+            {form.targetMapId ? (
+              <div className="node-editor__portal-linked">
+                <span className="node-editor__portal-dest">
+                  → {form.targetMapTitle || form.targetMapId}
+                </span>
+                {!readOnly && (
+                  <button
+                    className="node-editor__portal-clear"
+                    onClick={handleMapClear}
+                    title="Remove link"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ) : (
+              <p className="node-editor__hint">No map linked yet.</p>
+            )}
+            {!readOnly && (
+              <>
+                <button
+                  className="node-editor__portal-btn"
+                  onClick={() => setShowLinkModal(true)}
+                >
+                  ↗ {form.targetMapId ? 'Change linked map…' : 'Link a map…'}
+                </button>
+                <div className="node-editor__portal-paste">
+                  <input
+                    className="node-editor__input"
+                    placeholder="…or paste /map/… URL"
+                    value={pasteValue}
+                    onChange={(e) => setPasteValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handlePasteLink() }}
+                  />
+                  <button
+                    className="node-editor__portal-go"
+                    onClick={handlePasteLink}
+                    disabled={pasting || !pasteValue.trim()}
+                    title="Fetch map info from URL"
+                  >
+                    {pasting ? '…' : 'Link'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* ── Layer ── */}
         <div className="node-editor__field">
           <label className="node-editor__label">Layer</label>
@@ -185,6 +279,13 @@ export default function NodeEditor({ node, onChange, onDelete, onDuplicate, allN
           </div>
         )}
       </div>
+
+      {showLinkModal && (
+        <MapLinkModal
+          onSelect={handleMapLink}
+          onClose={() => setShowLinkModal(false)}
+        />
+      )}
     </div>
   )
 }
